@@ -1,13 +1,21 @@
 package edu.kvcc.cis298.cis298assignment4;
 
+import android.app.Activity;
+import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.database.Cursor;
+import android.net.Uri;
 import android.os.Bundle;
+import android.provider.ContactsContract;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v4.media.RatingCompat;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.EditText;
@@ -20,12 +28,17 @@ public class BeverageFragment extends Fragment {
     //String key that will be used to send data between fragments
     private static final String ARG_BEVERAGE_ID = "crime_id";
 
+    // >Request codes.
+    private static final int REQUEST_CONTACT = 0;
+
     //private class level vars for the model properties
     private EditText mId;
     private EditText mName;
     private EditText mPack;
     private EditText mPrice;
     private CheckBox mActive;
+    private Button mContact;
+    private Button mSendDetails;
 
     //Private var for storing the beverage that will be displayed with this fragment
     private Beverage mBeverage;
@@ -151,7 +164,67 @@ public class BeverageFragment extends Fragment {
             }
         });
 
-        //Lastley return the view with all of this stuff attached and set on it.
+
+        // >Create an intent to get the contact.
+        final Intent pickContact = new Intent(Intent.ACTION_PICK, ContactsContract.Contacts.CONTENT_URI);
+
+        mContact = (Button) view.findViewById(R.id.beverage_contact);
+        mContact.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startActivityForResult(pickContact, REQUEST_CONTACT);
+            }
+        });
+
+        // >Check if there is a default contacts app.
+        PackageManager packageManager = getActivity().getPackageManager();
+        if (packageManager.resolveActivity(pickContact, PackageManager.MATCH_DEFAULT_ONLY) == null) {
+            mContact.setEnabled(false);
+        }
+
+
+        //Lastly return the view with all of this stuff attached and set on it.
         return view;
     }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        // >Don't do anything if the result is not ok.
+        if (resultCode != Activity.RESULT_OK) {
+            return;
+        }
+
+        if (requestCode == REQUEST_CONTACT && data != null) {
+            // >
+            Uri contactUri = data.getData();
+
+            String[] queryFields = new String[] {
+                    ContactsContract.Contacts.DISPLAY_NAME
+            };
+
+            Cursor c = getActivity().getContentResolver().query(contactUri, queryFields, null, null, null);
+
+            try {
+                // >Return if there is no count.
+                if (c.getCount() == 0) {
+                    return;
+                }
+
+                c.moveToFirst();
+                String name = c.getString(0);
+
+            } finally {
+                c.close();
+            }
+        }
+    }
+
+    // >Create a report.
+    private String createBeverageReport() {
+
+
+        return new String ();
+    }
+
+
 }

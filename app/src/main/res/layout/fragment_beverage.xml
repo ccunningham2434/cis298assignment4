@@ -115,4 +115,20 @@
 
         </LinearLayout>
 
+    <Button
+        android:id="@+id/beverage_contact"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="4dp"
+        android:layout_marginRight="4dp"
+        android:text="@string/beverage_select_contact" />
+
+    <Button
+        android:id="@+id/beverage_send"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="4dp"
+        android:layout_marginRight="4dp"
+        android:text="@string/beverage_send_details" />
+
 </LinearLayout>

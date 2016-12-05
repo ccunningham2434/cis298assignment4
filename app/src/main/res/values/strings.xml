@@ -17,4 +17,11 @@
 
     <string name="beverage_select_contact">SELECT CONTACT</string>
     <string name="beverage_send_details">SEND BEVERAGE DETAILS</string>
+
+    <string name="choose_app">Select an app to send the report</string>
+    <string name="beverage_report_subject">Beverage App Item Information</string>
+    <string name="beverage_report_message">Please Review the Following Beverage.</string>
+
+    <string name="beverage_is_active">Currently Active</string>
+    <string name="beverage_not_active">Not Active</string>
 </resources>

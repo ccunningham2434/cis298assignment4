@@ -12,6 +12,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.media.RatingCompat;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -37,8 +38,12 @@ public class BeverageFragment extends Fragment {
     private EditText mPack;
     private EditText mPrice;
     private CheckBox mActive;
+
     private Button mContact;
     private Button mSendDetails;
+
+    private String mContactName = "";
+    private String mContactEmail = "";
 
     //Private var for storing the beverage that will be displayed with this fragment
     private Beverage mBeverage;
@@ -68,7 +73,7 @@ public class BeverageFragment extends Fragment {
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        //Use the inflator to get the view from the layout
+        //Use the inflater to get the view from the layout
         View view = inflater.inflate(R.layout.fragment_beverage, container, false);
 
         //Get handles to the widget controls in the view
@@ -176,12 +181,30 @@ public class BeverageFragment extends Fragment {
             }
         });
 
-        // >Check if there is a default contacts app.
+        // >Deactivate the button if there is not a default contacts app.
         PackageManager packageManager = getActivity().getPackageManager();
         if (packageManager.resolveActivity(pickContact, PackageManager.MATCH_DEFAULT_ONLY) == null) {
             mContact.setEnabled(false);
         }
 
+        mSendDetails = (Button) view.findViewById(R.id.beverage_send);
+        mSendDetails.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // >
+                Intent i = new Intent(Intent.ACTION_SEND);
+                i.setType("text/plain");
+                // >Add the data to the intent.
+                i.putExtra(Intent.EXTRA_EMAIL, new String[] {mContactEmail});
+                i.putExtra(Intent.EXTRA_SUBJECT, getString(R.string.beverage_report_subject));
+                i.putExtra(Intent.EXTRA_TEXT, createBeverageReport());
+
+                // >Make the app prompt what to use.
+                i = Intent.createChooser(i, getString(R.string.choose_app));
+
+                startActivity(i);
+            }
+        });
 
         //Lastly return the view with all of this stuff attached and set on it.
         return view;
@@ -195,35 +218,100 @@ public class BeverageFragment extends Fragment {
         }
 
         if (requestCode == REQUEST_CONTACT && data != null) {
-            // >
+//            // >
+//            Uri contactUri = data.getData();
+//
+//            String[] queryFields = new String[] {
+//                    ContactsContract.Contacts.DISPLAY_NAME
+//            };
+//
+//            Cursor c = getActivity().getContentResolver().query(contactUri, queryFields, null, null, null);
+//
+//            try {
+//                // >Return if there is no count.
+//                if (c.getCount() == 0) {
+//                    return;
+//                }
+//
+//                c.moveToFirst();
+//                mContactName = c.getString(0);
+//
+//
+//                Cursor c1 = getActivity().getContentResolver().query(
+//                        ContactsContract.CommonDataKinds.Email.CONTENT_URI, null,
+//                        ContactsContract.CommonDataKinds.Email.CONTACT_ID + " = ?",
+//                        new String[]{c.getString(c.getColumnIndex(ContactsContract.Contacts._ID))}, null
+//                );
+//                c1.moveToFirst();
+//
+//                //String email = c1.getString(c1.getColumnIndex(ContactsContract.CommonDataKinds.Email.DATA));
+//
+//            } finally {
+//                c.close();
+//            }
+
             Uri contactUri = data.getData();
 
-            String[] queryFields = new String[] {
-                    ContactsContract.Contacts.DISPLAY_NAME
-            };
+            Cursor cursor;  // Cursor object
+            String mime;    // MIME type
+            int dataIdx;    // Index of DATA1 column
+            int mimeIdx;    // Index of MIMETYPE column
+            int nameIdx;    // Index of DISPLAY_NAME column
 
-            Cursor c = getActivity().getContentResolver().query(contactUri, queryFields, null, null, null);
+            // Get the name
+            cursor = getActivity().getContentResolver().query(contactUri,
+                    new String[] { ContactsContract.Contacts.DISPLAY_NAME },
+                    null, null, null);
+            if (cursor.moveToFirst()) {
+                nameIdx = cursor.getColumnIndex(
+                        ContactsContract.Contacts.DISPLAY_NAME);
+                mContactName = cursor.getString(nameIdx);
 
-            try {
-                // >Return if there is no count.
-                if (c.getCount() == 0) {
-                    return;
+                // Set up the projection
+                String[] projection = {
+                        ContactsContract.Data.DISPLAY_NAME,
+                        ContactsContract.Contacts.Data.DATA1,
+                        ContactsContract.Contacts.Data.MIMETYPE };
+
+                // Query ContactsContract.Data
+                cursor = getActivity().getContentResolver().query(
+                        ContactsContract.Data.CONTENT_URI, projection,
+                        ContactsContract.Data.DISPLAY_NAME + " = ?",
+                        new String[] { mContactName },
+                        null);
+
+                if (cursor.moveToFirst()) {
+                    // Get the indexes of the MIME type and data
+                    mimeIdx = cursor.getColumnIndex(
+                            ContactsContract.Contacts.Data.MIMETYPE);
+                    dataIdx = cursor.getColumnIndex(
+                            ContactsContract.Contacts.Data.DATA1);
+                    // Match the data to the MIME type, store in variables
+                    do {
+                        mime = cursor.getString(mimeIdx);
+                        if (ContactsContract.CommonDataKinds.Email
+                                .CONTENT_ITEM_TYPE.equalsIgnoreCase(mime)) {
+                            mContactEmail = cursor.getString(dataIdx);
+                        }
+                    } while (cursor.moveToNext());
+                    cursor.close();
                 }
-
-                c.moveToFirst();
-                String name = c.getString(0);
-
-            } finally {
-                c.close();
             }
+
         }
     }
 
     // >Create a report.
     private String createBeverageReport() {
+        String report = mContactName + ","
+                + getString(R.string.beverage_report_message)
+                + mBeverage.getId()
+                + mBeverage.getName()
+                + mBeverage.getPack()
+                + mBeverage.getPrice()
+                + getString((mBeverage.isActive() ? R.string.beverage_is_active : R.string.beverage_not_active));
 
-
-        return new String ();
+        return report;
     }
 
 

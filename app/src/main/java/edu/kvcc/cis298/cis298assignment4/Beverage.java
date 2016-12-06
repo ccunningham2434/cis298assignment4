@@ -1,11 +1,14 @@
 package edu.kvcc.cis298.cis298assignment4;
 
+import java.util.UUID;
+
 /**
  * Created by David Barnes on 11/3/2015.
  */
 public class Beverage {
 
     //Private member variables for the model
+    private UUID mUUID;
     private String mId;
     private String mName;
     private String mPack;
@@ -13,11 +16,16 @@ public class Beverage {
     private boolean mActive;
 
     public Beverage() {
-        //Do Nothing
+        mUUID = UUID.randomUUID();
+    }
+
+    public Beverage(UUID uuid) {
+        mUUID = uuid;
     }
 
     //5 parameter constructor to set the properties of the model
     public Beverage(String Id, String Name, String Pack, double Price, boolean Active) {
+        mUUID = UUID.randomUUID();
         mId = Id;
         mName = Name;
         mPack = Pack;
@@ -25,7 +33,10 @@ public class Beverage {
         mActive = Active;
     }
 
+
     //Getters and Setters
+    public UUID getUUID() { return mUUID; };
+
     public String getId() {
         return mId;
     }

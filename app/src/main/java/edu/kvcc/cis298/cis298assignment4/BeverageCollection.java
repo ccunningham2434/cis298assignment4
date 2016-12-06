@@ -1,11 +1,17 @@
 package edu.kvcc.cis298.cis298assignment4;
 
+import android.content.ContentValues;
 import android.content.Context;
+import android.database.sqlite.SQLiteDatabase;
 import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
+
+import edu.kvcc.cis298.cis298assignment4.database.BeverageBaseHelper;
+import edu.kvcc.cis298.cis298assignment4.database.BeverageDBSchema;
+import edu.kvcc.cis298.cis298assignment4.database.BeverageDBSchema.BeverageTable;
 
 /**
  * Created by David Barnes on 11/3/2015.
@@ -15,6 +21,8 @@ public class BeverageCollection {
 
     //Static variable that represents this class
     private static BeverageCollection sBeverageCollection;
+
+    private SQLiteDatabase mDatabase;// >The database.
 
     //private variable for the context that the singleton operates in
     private Context mContext;
@@ -38,9 +46,9 @@ public class BeverageCollection {
         //Make a new list to hold the beverages
         mBeverages = new ArrayList<>();
         //Set the context to the one that is passed in
-        mContext = context;
-        //Call the private method to load the beverage list
-        loadBeverageList();
+        mContext = context.getApplicationContext();
+        // >Set the database.
+        mDatabase = new BeverageBaseHelper(mContext).getWritableDatabase();
     }
 
     //Getters
@@ -95,4 +103,34 @@ public class BeverageCollection {
             scanner.close();
         }
     }
+
+
+    // >Add a beverage to the database.
+    public void addBeverage(Beverage beverage) {
+        ContentValues values = getContentValues(beverage);
+        // >Insert a new record into the database.
+        mDatabase.insert(BeverageTable.NAME, null, values);
+    }
+
+    private static ContentValues getContentValues(Beverage beverage) {
+        ContentValues values = new ContentValues();
+
+        values.put(BeverageTable.Cols.ID, beverage.getId());
+        values.put(BeverageTable.Cols.NAME, beverage.getName());
+        values.put(BeverageTable.Cols.PACK, beverage.getPack());
+        values.put(BeverageTable.Cols.PRICE, beverage.getPrice());
+        values.put(BeverageTable.Cols.ACTIVE, beverage.isActive() ? 1 : 0);
+
+        return values;
+    }
+
+    public void updateBeverage(Beverage beverage) {
+
+
+        ContentValues values = getContentValues(beverage);
+
+        mDatabase.update(BeverageTable.NAME, values,
+                uuid + " = ?")
+    }
+
 }

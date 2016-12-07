@@ -2,14 +2,17 @@ package edu.kvcc.cis298.cis298assignment4;
 
 import android.content.ContentValues;
 import android.content.Context;
+import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
+import java.util.UUID;
 
 import edu.kvcc.cis298.cis298assignment4.database.BeverageBaseHelper;
+import edu.kvcc.cis298.cis298assignment4.database.BeverageCursorWrapper;
 import edu.kvcc.cis298.cis298assignment4.database.BeverageDBSchema;
 import edu.kvcc.cis298.cis298assignment4.database.BeverageDBSchema.BeverageTable;
 
@@ -27,9 +30,6 @@ public class BeverageCollection {
     //private variable for the context that the singleton operates in
     private Context mContext;
 
-    //List to store all of the beverages
-    private List<Beverage> mBeverages;
-
     //public static method to get the single instance of this class
     public static BeverageCollection get(Context context) {
         //If the collection is null
@@ -43,65 +43,10 @@ public class BeverageCollection {
 
     //Private constructor to create a new BeverageCollection
     private BeverageCollection(Context context) {
-        //Make a new list to hold the beverages
-        mBeverages = new ArrayList<>();
         //Set the context to the one that is passed in
         mContext = context.getApplicationContext();
         // >Set the database.
         mDatabase = new BeverageBaseHelper(mContext).getWritableDatabase();
-    }
-
-    //Getters
-    public List<Beverage> getBeverages() {
-        return mBeverages;
-    }
-
-    public Beverage getBeverage(String Id) {
-        for (Beverage beverage : mBeverages) {
-            if (beverage.getId().equals(Id)) {
-                return beverage;
-            }
-        }
-        return null;
-    }
-
-    //Method to load the beverage list from a CSV file
-    private void loadBeverageList() {
-
-        //Define a scanner
-        Scanner scanner = null;
-
-        try {
-
-            //Instanciate a new scanner
-            scanner = new Scanner(mContext.getResources().openRawResource(R.raw.beverage_list));
-
-            //While the scanner has another line to read
-            while (scanner.hasNextLine()) {
-
-                //Get the next line and split it into parts
-                String line = scanner.nextLine();
-                String parts[] = line.split(",");
-
-                //Assign each part to a local var
-                String id = parts[0];
-                String name = parts[1];
-                String pack = parts[2];
-
-                //setup some vars for doing parsing
-                double price = Double.parseDouble(parts[3]);
-                boolean active = ((parts[4].equals("True")));
-
-                //Add the beverage to the list
-                mBeverages.add(new Beverage(id, name, pack, price, active));
-            }
-
-        //catch any errors that occur and finally close the scanner
-        } catch (Exception e) {
-            Log.e("Read CSV", e.toString());
-        } finally {
-            scanner.close();
-        }
     }
 
 
@@ -110,6 +55,56 @@ public class BeverageCollection {
         ContentValues values = getContentValues(beverage);
         // >Insert a new record into the database.
         mDatabase.insert(BeverageTable.NAME, null, values);
+    }
+
+    public List<Beverage> getBeverages() {
+        List<Beverage> beverages = new ArrayList<>();// >List to hold the beverages.
+
+        // >Create a cursor wrapper with no where clause or arguments.
+        BeverageCursorWrapper cursorWrapper = queryBeverages(null, null);
+
+        try {
+            cursorWrapper.moveToFirst();
+            while (!cursorWrapper.isAfterLast()) {
+                beverages.add(cursorWrapper.getBeverage());
+                cursorWrapper.moveToNext();
+            }
+        } finally {
+            cursorWrapper.close();
+        }
+        return beverages;
+    }
+
+    public Beverage getBeverage(UUID uuid) {
+        // >Create a cursor wrapper to get a single beverage.
+        BeverageCursorWrapper cursorWrapper = queryBeverages(
+                BeverageTable.Cols.UUID + " = ?",
+                new String[] {uuid.toString()}
+        );
+
+        try {
+            // >Return if there was no result.
+            if (cursorWrapper.getCount() == 0) {
+                return null;
+            }
+
+            cursorWrapper.moveToFirst();
+            return cursorWrapper.getBeverage();
+        } finally {
+            cursorWrapper.close();
+        }
+    }
+
+    public void updateBeverage(Beverage beverage) {
+        // >Convert the UUID so it can be used in the where clause.
+        String uuidString = beverage.getUUID().toString();
+        // >Get the content values from the beverage.
+        ContentValues values = getContentValues(beverage);
+        // >Update the database.
+        mDatabase.update(BeverageTable.NAME, values,
+                BeverageTable.Cols.UUID + " = ?",
+                new String[] {uuidString}
+        );
     }
 
     private static ContentValues getContentValues(Beverage beverage) {
@@ -124,13 +119,19 @@ public class BeverageCollection {
         return values;
     }
 
-    public void updateBeverage(Beverage beverage) {
-
-
-        ContentValues values = getContentValues(beverage);
-
-        mDatabase.update(BeverageTable.NAME, values,
-                uuid + " = ?")
+    private BeverageCursorWrapper queryBeverages(String whereClause, String[] whereArgs) {
+        Cursor cursor = mDatabase.query(
+                BeverageTable.NAME,
+                null,// >columns
+                whereClause,
+                whereArgs,
+                null,// >group by
+                null,// >having
+                null// >order by
+        );
+        return new BeverageCursorWrapper(cursor);
     }
+
+
 
 }

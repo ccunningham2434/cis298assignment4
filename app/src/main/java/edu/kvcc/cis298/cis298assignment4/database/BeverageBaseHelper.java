@@ -3,6 +3,7 @@ package edu.kvcc.cis298.cis298assignment4.database;
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.os.AsyncTask;
 import android.util.Log;
 
 import java.util.Scanner;
@@ -41,7 +42,7 @@ public class BeverageBaseHelper extends SQLiteOpenHelper {
             + ")"
         );
         // >Mark that the database should be seeded..
-        mShouldSeed = false;
+        mShouldSeed = true;
     }
 
     @Override
@@ -52,24 +53,21 @@ public class BeverageBaseHelper extends SQLiteOpenHelper {
         super.onOpen(db);
         // >Seed the database if needed.
         if (mShouldSeed) {
-            seedBeverages();
+            new FetchBeveragesTask().execute();
         }
     }
 
     // >Seed the database from a web server.
-    private void seedBeverages() {
-        Scanner scanner = null;
+    private class FetchBeveragesTask extends AsyncTask<Void, Void, Void> {
+        @Override
+        protected Void doInBackground(Void... params) {
+            new BeverageFetcher().fetchBeverages();
+            return null;
+        }
 
-        try {
-
-
-        } catch (Exception e) {
-            Log.e("Seeding", e.toString());
-        } finally {
-            // >Close the scanner.
-            if (scanner != null) {
-                scanner.close();
-            }
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            super.onPostExecute(aVoid);
         }
     }
 

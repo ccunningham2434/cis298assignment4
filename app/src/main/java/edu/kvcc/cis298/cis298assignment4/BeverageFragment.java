@@ -21,6 +21,8 @@ import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.EditText;
 
+import java.util.UUID;
+
 /**
  * Created by David Barnes on 11/3/2015.
  */
@@ -65,7 +67,7 @@ public class BeverageFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         //When created, get the beverage id from the fragment args.
-        String beverageId = getArguments().getString(ARG_BEVERAGE_ID);
+        UUID beverageId = (UUID) getArguments().getSerializable(ARG_BEVERAGE_ID);
         //use the id to get the beverage from the singleton
         mBeverage = BeverageCollection.get(getActivity()).getBeverage(beverageId);
     }

@@ -24,4 +24,13 @@
 
     <string name="beverage_is_active">Currently Active</string>
     <string name="beverage_not_active">Not Active</string>
+
+    <string name="beverage_report">%1$s!
+        Please Review the Following Beverage.
+        %2$s
+        %3$s
+        %4$s
+        %5$a
+        %6$s
+    </string>
 </resources>

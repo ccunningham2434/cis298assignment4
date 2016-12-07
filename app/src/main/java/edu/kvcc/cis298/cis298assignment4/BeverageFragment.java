@@ -220,37 +220,6 @@ public class BeverageFragment extends Fragment {
         }
 
         if (requestCode == REQUEST_CONTACT && data != null) {
-//            // >
-//            Uri contactUri = data.getData();
-//
-//            String[] queryFields = new String[] {
-//                    ContactsContract.Contacts.DISPLAY_NAME
-//            };
-//
-//            Cursor c = getActivity().getContentResolver().query(contactUri, queryFields, null, null, null);
-//
-//            try {
-//                // >Return if there is no count.
-//                if (c.getCount() == 0) {
-//                    return;
-//                }
-//
-//                c.moveToFirst();
-//                mContactName = c.getString(0);
-//
-//
-//                Cursor c1 = getActivity().getContentResolver().query(
-//                        ContactsContract.CommonDataKinds.Email.CONTENT_URI, null,
-//                        ContactsContract.CommonDataKinds.Email.CONTACT_ID + " = ?",
-//                        new String[]{c.getString(c.getColumnIndex(ContactsContract.Contacts._ID))}, null
-//                );
-//                c1.moveToFirst();
-//
-//                //String email = c1.getString(c1.getColumnIndex(ContactsContract.CommonDataKinds.Email.DATA));
-//
-//            } finally {
-//                c.close();
-//            }
 
             Uri contactUri = data.getData();
 
@@ -305,15 +274,14 @@ public class BeverageFragment extends Fragment {
 
     // >Create a report.
     private String createBeverageReport() {
-        String report = mContactName + ","
-                + getString(R.string.beverage_report_message)
-                + mBeverage.getId()
-                + mBeverage.getName()
-                + mBeverage.getPack()
-                + mBeverage.getPrice()
-                + getString((mBeverage.isActive() ? R.string.beverage_is_active : R.string.beverage_not_active));
-
-        return report;
+        return getString(R.string.beverage_report,
+                mContactName,
+                mBeverage.getId(),
+                mBeverage.getName(),
+                mBeverage.getPack(),
+                mBeverage.getPrice(),
+                getString((mBeverage.isActive() ? R.string.beverage_is_active : R.string.beverage_not_active))
+        );
     }
 
 

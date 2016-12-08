@@ -187,11 +187,6 @@ public class BeverageFragment extends Fragment {
             }
         });
 
-        // >Deactivate the button if there is not a default contacts app.
-        PackageManager packageManager = getActivity().getPackageManager();
-        if (packageManager.resolveActivity(pickContact, PackageManager.MATCH_DEFAULT_ONLY) == null) {
-            mContact.setEnabled(false);
-        }
 
         mSendDetails = (Button) view.findViewById(R.id.beverage_send);
         mSendDetails.setOnClickListener(new View.OnClickListener() {
@@ -211,6 +206,21 @@ public class BeverageFragment extends Fragment {
                 startActivity(i);
             }
         });
+        mSendDetails.setEnabled(false);
+
+        // >Deactivate the button if there is not a default contacts app.
+        PackageManager packageManager = getActivity().getPackageManager();
+        if (packageManager.resolveActivity(pickContact, PackageManager.MATCH_DEFAULT_ONLY) == null) {
+            mContact.setEnabled(false);
+            // >Let a report be sent.
+            mSendDetails.setEnabled(true);
+        }
+
+        // >Allow a report to be sent if the contact was chosen.
+        if (mContactName != "") {
+            mContact.setText(mContactName);
+            mSendDetails.setEnabled(true);
+        }
 
         //Lastly return the view with all of this stuff attached and set on it.
         return view;
@@ -241,6 +251,8 @@ public class BeverageFragment extends Fragment {
                 nameIdx = cursor.getColumnIndex(
                         ContactsContract.Contacts.DISPLAY_NAME);
                 mContactName = cursor.getString(nameIdx);
+                mContact.setText(mContactName);
+                mSendDetails.setEnabled(true);
 
                 // Set up the projection
                 String[] projection = {

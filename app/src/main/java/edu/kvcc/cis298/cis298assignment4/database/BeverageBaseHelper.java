@@ -82,6 +82,7 @@ public class BeverageBaseHelper extends SQLiteOpenHelper {
             }
 
             BeverageListFragment.staticSelf.setupAdapter();
+            BeverageListFragment.staticSelf.updateUI();
         }
     }
 

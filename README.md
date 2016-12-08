@@ -90,7 +90,7 @@ http://stackoverflow.com/questions/8701634/send-email-intent
 
 
 ## Known Problems, Issues, And/Or Errors in the Program
-None
+When first installing, the screen will be white as the data is fetched and put into the database. So it may appear to not be working, but if you wait a while, the list will populate.
 
 
 # Original Assignment README

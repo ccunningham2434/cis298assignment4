@@ -67,9 +67,13 @@ public class BeverageFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         //When created, get the beverage id from the fragment args.
-        UUID beverageId = (UUID) getArguments().getSerializable(ARG_BEVERAGE_ID);
+//        UUID beverageId = (UUID) getArguments().getSerializable(ARG_BEVERAGE_ID);
+//        //use the id to get the beverage from the singleton
+//        mBeverage = BeverageCollection.get(getActivity()).getBeverage(beverageId);
+
+        String beverageId = (String) getArguments().getSerializable(ARG_BEVERAGE_ID);
         //use the id to get the beverage from the singleton
-        mBeverage = BeverageCollection.get(getActivity()).getBeverage(beverageId);
+        mBeverage = BeverageCollection.get(getActivity()).getBeverageByString(beverageId);
     }
 
     @Nullable

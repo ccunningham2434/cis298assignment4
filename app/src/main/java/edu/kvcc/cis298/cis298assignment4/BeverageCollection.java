@@ -63,6 +63,7 @@ public class BeverageCollection {
         // >Create a cursor wrapper with no where clause or arguments.
         BeverageCursorWrapper cursorWrapper = queryBeverages(null, null);
 
+        // >Add all of the beverages from the database to the list.
         try {
             cursorWrapper.moveToFirst();
             while (!cursorWrapper.isAfterLast()) {
@@ -80,6 +81,26 @@ public class BeverageCollection {
         BeverageCursorWrapper cursorWrapper = queryBeverages(
                 BeverageTable.Cols.UUID + " = ?",
                 new String[] {uuid.toString()}
+        );
+
+        try {
+            // >Return if there was no result.
+            if (cursorWrapper.getCount() == 0) {
+                return null;
+            }
+
+            cursorWrapper.moveToFirst();
+            return cursorWrapper.getBeverage();
+        } finally {
+            cursorWrapper.close();
+        }
+    }
+
+    public Beverage getBeverageByString(String id) {
+        // >Create a cursor wrapper to get a single beverage.
+        BeverageCursorWrapper cursorWrapper = queryBeverages(
+                BeverageTable.Cols.ID + " = ?",
+                new String[] {id}
         );
 
         try {

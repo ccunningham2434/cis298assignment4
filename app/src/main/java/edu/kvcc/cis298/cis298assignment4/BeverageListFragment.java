@@ -19,14 +19,24 @@ import java.util.List;
  */
 public class BeverageListFragment extends Fragment {
 
+    public static BeverageListFragment staticSelf;
+
     //Private variables for the recycler view and the required adapter
     private RecyclerView mBeverageRecyclerView;
     private BeverageAdapter mBeverageAdapter;
 
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+        staticSelf = this;
+    }
+
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        //Use the inflator to create a new view
+        //Use the inflater to create a new view
         View view = inflater.inflate(R.layout.fragment_beverage_list, container, false);
 
         //Get a handle for the recycler view
@@ -59,12 +69,22 @@ public class BeverageListFragment extends Fragment {
 
         //If there is no adapter, make a new one and send it in the list of beverages
         if (mBeverageAdapter == null) {
-            mBeverageAdapter = new BeverageAdapter(beverages);
-            //set the adapter for the recyclerview to the newly created adapter
-            mBeverageRecyclerView.setAdapter(mBeverageAdapter);
+//            mBeverageAdapter = new BeverageAdapter(beverages);
+//            //set the adapter for the recyclerview to the newly created adapter
+//            mBeverageRecyclerView.setAdapter(mBeverageAdapter);
+
+            setupAdapter();
         } else {
             //adapter already exists, so just call the notify data set changed method to update
             mBeverageAdapter.notifyDataSetChanged();
+        }
+    }
+
+    public void setupAdapter() {
+        if (isAdded()) {
+            BeverageCollection collection = BeverageCollection.get(getActivity());
+            mBeverageAdapter = new BeverageAdapter(collection.getBeverages());
+            mBeverageRecyclerView.setAdapter(mBeverageAdapter);
         }
     }
 
